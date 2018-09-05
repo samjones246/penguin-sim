@@ -19,12 +19,11 @@ public class Penguin extends JLabel{
     private TimerTask tickTask;
 
     /**
-     * Initialises the penguin with a given name, setting up the timer.
-     * @param name The name of the penguin
+     * Initialises the penguin, setting up the timer.
      */
-    Penguin(String name){
+    Penguin(){
         super(MainWindow.createImageIcon("images/penguin_256.png",null));
-        this.name = name;
+        name = "Penguin";
         t = new Timer();
         tickTask = new TimerTask() {
             int playTimer = 0;
@@ -62,7 +61,6 @@ public class Penguin extends JLabel{
                 sleepTimer++;
             }
         };
-        t.scheduleAtFixedRate(tickTask,5000,5000);
     }
 
     /**
@@ -202,6 +200,15 @@ public class Penguin extends JLabel{
     }
 
     /**
+     * Gives the penguin a new name.
+     * @param name The name to give the penguin.
+     */
+    public void setName(String name){
+        this.name = name;
+        resume();
+    }
+
+    /**
      * Stops timer and notifies listeners that penguin has left.
      */
     private void gone(){
@@ -232,6 +239,7 @@ public class Penguin extends JLabel{
     public void resume(){
         t.cancel();
         if(!gone){
+            t = new Timer();
             t.scheduleAtFixedRate(tickTask, 5000, 5000);
         }
     }

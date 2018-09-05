@@ -1,28 +1,35 @@
-import javafx.scene.control.ContextMenu;
-
 import javax.swing.*;
 import java.awt.*;
 import java.util.Objects;
 
 public class MainWindow extends JFrame{
-    Penguin penguin;
-    JLabel health;
-    JLabel food;
-    JLabel happiness;
+    private Penguin penguin;
+    private JLabel health;
+    private JLabel food;
+    private JLabel happiness;
+    private JLabel fishCountLabel, medicineCountLabel, nameTag;
+    private int fishCount = 999, medicineCount = 999;
 
     MainWindow(String title){
         setTitle(title);
         JPanel mainPanel = new JPanel(new BorderLayout());
         setContentPane(mainPanel);
-        JPanel penguinPanel = new PenguinPanel(new BorderLayout());
-        penguinPanel.setPreferredSize(new Dimension(512,512));
-        mainPanel.add(penguinPanel);
-        Font statFont = new Font("Century Gothic",Font.PLAIN,36);
-        Font buttonFont = new Font("Courier New",Font.PLAIN,24);
+        mainPanel.add(initPenguin());
+        mainPanel.add(initFunctions(),BorderLayout.SOUTH);
+        pack();
+        setDefaultCloseOperation(EXIT_ON_CLOSE);
+        setVisible(true);
+        start();
+    }
 
-        String name = "Three";
-        penguin = new Penguin(name);
-        penguinPanel.add(penguin,BorderLayout.CENTER);
+    private void start() {
+        String name = JOptionPane.showInputDialog("Enter a name for your newly adopted penguin: ");
+        penguin.setName(name);
+        updateStats();
+    }
+
+    public JPanel initStats(){
+        Font statFont = new Font("Century Gothic",Font.PLAIN,36);
         health = new JLabel("100",createImageIcon("images/heart_32.png",null),SwingConstants.RIGHT);
         health.setFont(statFont);
         health.setForeground(Color.GREEN);
@@ -40,7 +47,47 @@ public class MainWindow extends JFrame{
         statsPanel.add(food);
         statsPanel.add(Box.createHorizontalGlue());
         statsPanel.add(happiness);
-        penguinPanel.add(statsPanel, BorderLayout.NORTH);
+        return statsPanel;
+    }
+    public JPanel initFunctions(){
+        Font buttonFont = new Font("Courier New",Font.PLAIN,24);
+        JPanel functionsPanel = new JPanel(new GridLayout(2,3));
+        JButton feed = new JButton("FEED");
+        feed.setFont(buttonFont);
+        JButton play = new JButton("PLAY");
+        play.setFont(buttonFont);
+        JButton cure = new JButton("CURE");
+        cure.setFont(buttonFont);
+        nameTag = new JLabel("Name: ");
+        fishCountLabel = new JLabel("Fish Available: ");
+        medicineCountLabel = new JLabel("Medicine Available: ");
+        functionsPanel.add(nameTag);
+        functionsPanel.add(fishCountLabel);
+        functionsPanel.add(medicineCountLabel);
+        functionsPanel.add(feed);
+        functionsPanel.add(play);
+        functionsPanel.add(cure);
+        cure.addActionListener(e -> {
+            penguin.cure();
+            penguin.heal(50);
+            medicineCount--;
+        });
+        play.addActionListener(e -> {
+            penguin.happy(25);
+
+        });
+        feed.addActionListener(e -> {
+            penguin.feed(10);
+            fishCount--;
+        });
+        return functionsPanel;
+    }
+    public JPanel initPenguin(){
+        JPanel penguinPanel = new PenguinPanel(new BorderLayout());
+        penguin = new Penguin();
+        penguinPanel.setPreferredSize(new Dimension(512,512));
+        penguinPanel.add(initStats(), BorderLayout.NORTH);
+        penguinPanel.add(penguin,BorderLayout.CENTER);
         penguin.addActionListener(e -> {
             if(Objects.equals(e.getActionCommand(), "UPDATE")) {
                 updateStats();
@@ -49,27 +96,7 @@ public class MainWindow extends JFrame{
                 gameOver();
             }
         });
-
-        JPanel functionsPanel = new JPanel(new GridLayout());
-        JButton feed = new JButton("FEED");
-        feed.addActionListener(e -> penguin.feed(10));
-        feed.setFont(buttonFont);
-        JButton play = new JButton("PLAY");
-        play.addActionListener(e -> penguin.happy(25));
-        play.setFont(buttonFont);
-        JButton cure = new JButton("CURE");
-        cure.addActionListener(e -> {
-            penguin.cure();
-            penguin.heal(50);
-        });
-        cure.setFont(buttonFont);
-        functionsPanel.add(feed);
-        functionsPanel.add(play);
-        functionsPanel.add(cure);
-        mainPanel.add(functionsPanel,BorderLayout.SOUTH);
-        pack();
-        setDefaultCloseOperation(EXIT_ON_CLOSE);
-        setVisible(true);
+        return penguinPanel;
     }
 
     private void gameOver() {
@@ -112,6 +139,9 @@ public class MainWindow extends JFrame{
         }else{
             health.setIcon(createImageIcon("images/heart_sick_32.png", null));
         }
+        nameTag.setText("Name: "+penguin.getName());
+        fishCountLabel.setText("Fish: " + fishCount);
+        medicineCountLabel.setText("Medicine: " + medicineCount);
     }
     public static ImageIcon createImageIcon(String path,
                                       String description) {
