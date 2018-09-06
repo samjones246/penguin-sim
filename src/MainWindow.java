@@ -7,8 +7,10 @@ public class MainWindow extends JFrame{
     private JLabel health;
     private JLabel food;
     private JLabel happiness;
+    private JLabel coinsLabel;
     private JLabel fishCountLabel, medicineCountLabel, nameTag;
-    private int fishCount = 999, medicineCount = 999;
+    private int fishCount = 999, medicineCount = 999, coins = 0;
+    private JButton feed, cure, play;
 
     MainWindow(String title){
         setTitle(title);
@@ -24,6 +26,11 @@ public class MainWindow extends JFrame{
 
     private void start() {
         String name = JOptionPane.showInputDialog("Enter a name for your newly adopted penguin: ");
+        if(name==null){
+            System.exit(0);
+        }else if(name.equals("")){
+            name="Penguin";
+        }
         penguin.setName(name);
         updateStats();
     }
@@ -39,24 +46,36 @@ public class MainWindow extends JFrame{
         happiness = new JLabel("100",createImageIcon("images/smile_32.png",null),SwingConstants.RIGHT);
         happiness.setFont(statFont);
         happiness.setForeground(Color.GREEN);
-        JPanel statsPanel = new JPanel();
-        statsPanel.setLayout(new BoxLayout(statsPanel, BoxLayout.X_AXIS));
-        statsPanel.setOpaque(false);
-        statsPanel.add(health);
-        statsPanel.add(Box.createHorizontalGlue());
-        statsPanel.add(food);
-        statsPanel.add(Box.createHorizontalGlue());
-        statsPanel.add(happiness);
-        return statsPanel;
+        coinsLabel = new JLabel("0", createImageIcon("images/coin_32.png", null), SwingConstants.RIGHT);
+        coinsLabel.setFont(statFont);
+        JPanel topPanel = new JPanel();
+        JPanel row1 = new JPanel();
+        JPanel row2 = new JPanel();
+        topPanel.setLayout(new BoxLayout(topPanel, BoxLayout.Y_AXIS));
+        row1.setLayout(new BoxLayout(row1, BoxLayout.X_AXIS));
+        row2.setLayout(new BoxLayout(row2, BoxLayout.X_AXIS));
+        row1.setOpaque(false);
+        row2.setOpaque(false);
+        topPanel.setOpaque(false);
+        row1.add(health);
+        row1.add(Box.createHorizontalGlue());
+        row1.add(food);
+        row1.add(Box.createHorizontalGlue());
+        row1.add(happiness);
+        row2.add(coinsLabel);
+        row2.add(Box.createHorizontalGlue());
+        topPanel.add(row1);
+        topPanel.add(row2);
+        return topPanel;
     }
     public JPanel initFunctions(){
         Font buttonFont = new Font("Courier New",Font.PLAIN,24);
         JPanel functionsPanel = new JPanel(new GridLayout(2,3));
-        JButton feed = new JButton("FEED");
+        feed = new JButton("FEED");
         feed.setFont(buttonFont);
-        JButton play = new JButton("PLAY");
+        play = new JButton("PLAY");
         play.setFont(buttonFont);
-        JButton cure = new JButton("CURE");
+        cure = new JButton("CURE");
         cure.setFont(buttonFont);
         nameTag = new JLabel("Name: ");
         fishCountLabel = new JLabel("Fish Available: ");
@@ -68,17 +87,17 @@ public class MainWindow extends JFrame{
         functionsPanel.add(play);
         functionsPanel.add(cure);
         cure.addActionListener(e -> {
+            medicineCount--;
             penguin.cure();
             penguin.heal(50);
-            medicineCount--;
         });
         play.addActionListener(e -> {
             penguin.happy(25);
 
         });
         feed.addActionListener(e -> {
-            penguin.feed(10);
             fishCount--;
+            penguin.feed(10);
         });
         return functionsPanel;
     }
@@ -94,6 +113,8 @@ public class MainWindow extends JFrame{
             }else if(Objects.equals(e.getActionCommand(), "GONE")){
                 updateStats();
                 gameOver();
+            }else if(Objects.equals(e.getActionCommand(), "PAYOUT")){
+                getCash();
             }
         });
         return penguinPanel;
@@ -142,6 +163,17 @@ public class MainWindow extends JFrame{
         nameTag.setText("Name: "+penguin.getName());
         fishCountLabel.setText("Fish: " + fishCount);
         medicineCountLabel.setText("Medicine: " + medicineCount);
+        coinsLabel.setText(""+coins);
+        if(penguin.getFood()<100&&fishCount>0){
+            feed.setEnabled(true);
+        }else{
+            feed.setEnabled(false);
+        }
+        if((penguin.getHealth()<100||!penguin.isHealthy())&&medicineCount>0){
+            cure.setEnabled(true);
+        }else{
+            cure.setEnabled(false);
+        }
     }
     public static ImageIcon createImageIcon(String path,
                                       String description) {
@@ -152,6 +184,11 @@ public class MainWindow extends JFrame{
             System.err.println("Couldn't find file: " + path);
             return null;
         }
+    }
+
+    public void getCash(){
+        coins+=penguin.getHappiness();
+        updateStats();
     }
 
     public static void main(String[] args) {

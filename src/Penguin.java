@@ -28,6 +28,7 @@ public class Penguin extends JLabel{
         tickTask = new TimerTask() {
             int playTimer = 0;
             int sleepTimer = 0;
+            int payTimer = 0;
             @Override
             public void run() {
                 if(food>0) {
@@ -57,8 +58,13 @@ public class Penguin extends JLabel{
                     sleepTimer = 0;
                     toggleSleep();
                 }
+                if(payTimer==3){
+                    notifyUpdate("PAYOUT");
+                    payTimer = 0;
+                }
                 playTimer++;
                 sleepTimer++;
+                payTimer++;
             }
         };
     }
