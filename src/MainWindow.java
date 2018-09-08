@@ -10,13 +10,13 @@ public class MainWindow extends JFrame{
     private JLabel coinsLabel;
     private JLabel fishCountLabel, medicineCountLabel, nameTag;
     private int fishCount = 999, medicineCount = 999, coins = 0;
-    private JButton feed, cure, play;
+    private JButton feed, cure, play, shop, goFishing, menu;
 
     MainWindow(String title){
         setTitle(title);
         JPanel mainPanel = new JPanel(new BorderLayout());
         setContentPane(mainPanel);
-        mainPanel.add(initPenguin());
+        mainPanel.add(initPenguin(), BorderLayout.CENTER);
         mainPanel.add(initFunctions(),BorderLayout.SOUTH);
         pack();
         setDefaultCloseOperation(EXIT_ON_CLOSE);
@@ -70,13 +70,19 @@ public class MainWindow extends JFrame{
     }
     public JPanel initFunctions(){
         Font buttonFont = new Font("Courier New",Font.PLAIN,24);
-        JPanel functionsPanel = new JPanel(new GridLayout(2,3));
+        JPanel functionsPanel = new JPanel(new GridLayout(3,3));
         feed = new JButton("FEED");
         feed.setFont(buttonFont);
         play = new JButton("PLAY");
         play.setFont(buttonFont);
         cure = new JButton("CURE");
         cure.setFont(buttonFont);
+        shop = new JButton("SHOP");
+        shop.setFont(buttonFont);
+        goFishing = new JButton("GO FISHING");
+        goFishing.setFont(buttonFont);
+        menu = new JButton("MENU");
+        menu.setFont(buttonFont);
         nameTag = new JLabel("Name: ");
         fishCountLabel = new JLabel("Fish Available: ");
         medicineCountLabel = new JLabel("Medicine Available: ");
@@ -86,6 +92,9 @@ public class MainWindow extends JFrame{
         functionsPanel.add(feed);
         functionsPanel.add(play);
         functionsPanel.add(cure);
+        functionsPanel.add(shop);
+        functionsPanel.add(goFishing);
+        functionsPanel.add(menu);
         cure.addActionListener(e -> {
             medicineCount--;
             penguin.cure();
@@ -99,14 +108,14 @@ public class MainWindow extends JFrame{
             fishCount--;
             penguin.feed(10);
         });
+        shop.addActionListener(e -> {
+            toggleShop();
+        });
         return functionsPanel;
     }
     public JPanel initPenguin(){
-        JPanel penguinPanel = new PenguinPanel(new BorderLayout());
-        penguin = new Penguin();
-        penguinPanel.setPreferredSize(new Dimension(512,512));
-        penguinPanel.add(initStats(), BorderLayout.NORTH);
-        penguinPanel.add(penguin,BorderLayout.CENTER);
+        penguin = new Penguin(new BorderLayout());
+        penguin.add(initStats(), BorderLayout.NORTH);
         penguin.addActionListener(e -> {
             if(Objects.equals(e.getActionCommand(), "UPDATE")) {
                 updateStats();
@@ -117,11 +126,44 @@ public class MainWindow extends JFrame{
                 getCash();
             }
         });
-        return penguinPanel;
+        return penguin;
+    }
+
+    private void toggleShop(){
+        if(penguin.getBg()==Penguin.MAIN) {
+            openShop();
+        }else if(penguin.getBg()==Penguin.SHOP){
+            penguin.setBg(Penguin.MAIN);
+            shop.setText("SHOP");
+        }
+    }
+    private void openShop(){
+        penguin.setBg(Penguin.SHOP);
+        shop.setText("RETURN");
+    }
+    private void closeShop(){
+
+    }
+    private void toggleFishing(){
+        if(penguin.getBg()==Penguin.MAIN) {
+            penguin.setBg(Penguin.SHOP);
+        }else if(penguin.getBg()==Penguin.SHOP){
+            penguin.setBg(Penguin.MAIN);
+        }
+    }
+    private void toggleGame(){
+        if(penguin.getBg()==Penguin.MAIN) {
+            penguin.setBg(Penguin.SHOP);
+        }else if(penguin.getBg()==Penguin.SHOP){
+            penguin.setBg(Penguin.MAIN);
+        }
+    }
+    private void toggleMenu(){
+
     }
 
     private void gameOver() {
-        JOptionPane.showMessageDialog(this,"Your penguin is tired of being neglected and has left. Adopt another?", "Game Over", JOptionPane.QUESTION_MESSAGE);
+        JOptionPane.showConfirmDialog(this,"Your penguin is tired of being neglected and has left. Adopt another?", "Game Over", JOptionPane.QUESTION_MESSAGE);
     }
 
     private void updateStats(){

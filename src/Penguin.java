@@ -1,6 +1,11 @@
+import javax.imageio.ImageIO;
 import javax.swing.*;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
 import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -10,7 +15,9 @@ import java.util.TimerTask;
  * Class to model the Player's Penguin.
  * Tracks stats and handles stat decay. Fires action events for stat updates.
  */
-public class Penguin extends JLabel{
+public class Penguin extends JPanel{
+    private int bg = 0, penguinX = 128, penguinY  = 256;
+    public static final int MAIN = 0, FISHING = 1, SHOP = 2, GAME = 3;
     private int food = 100, health = 100, happiness = 100;
     private boolean healthy = true, awake = true, gone = false;
     private int max = 100;
@@ -22,7 +29,12 @@ public class Penguin extends JLabel{
      * Initialises the penguin, setting up the timer.
      */
     Penguin(){
-        super(MainWindow.createImageIcon("images/penguin_256.png",null));
+        this(null);
+    }
+
+    Penguin(LayoutManager layoutManager){
+        super(layoutManager);
+        setPreferredSize(new Dimension(512, 512));
         name = "Penguin";
         t = new Timer();
         tickTask = new TimerTask() {
@@ -283,5 +295,44 @@ public class Penguin extends JLabel{
         for(ActionListener l : listenerList.getListeners(ActionListener.class)){
             l.actionPerformed(e);
         }
+    }
+    @Override
+    protected void paintComponent(Graphics g) {
+        super.paintComponent(g);
+        BufferedImage bgImage = null, penguinImage = null;
+        try {
+            if(bg==0){
+                bgImage = ImageIO.read(new File("resources/images/bg.png"));
+            }else if(bg==1){
+                bgImage = ImageIO.read(new File("resources/images/fishing_bg.png"));
+            }else if(bg==2){
+                bgImage = ImageIO.read(new File("resources/images/shop_bg.png"));
+            }else if(bg==3){
+                bgImage = ImageIO.read(new File("resources/images/game_bg.png"));
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        try{
+            penguinImage = ImageIO.read(new File("resources/images/penguin_256.png"));
+        }catch (IOException e){
+            e.printStackTrace();
+        }
+        g.drawImage(bgImage, 0, 0, null);
+        if(bg==MAIN) {
+            g.drawImage(penguinImage, penguinX, penguinY, null);
+        }
+    }
+
+    /**
+     * Changes the background image of this panel
+     * @param bg One of the static constants of this class; MAIN, SHOP, FISHING or GAME
+     */
+    public void setBg(int bg){
+        this.bg = bg;
+        repaint();
+    }
+    public int getBg(){
+        return bg;
     }
 }
