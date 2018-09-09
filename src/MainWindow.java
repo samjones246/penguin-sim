@@ -11,6 +11,8 @@ public class MainWindow extends JFrame{
     private JLabel fishCountLabel, medicineCountLabel, nameTag;
     private int fishCount = 999, medicineCount = 999, coins = 0;
     private JButton feed, cure, play, shop, goFishing, menu;
+    private JPanel topPanel;
+    private JScrollPane shopPanel;
 
     MainWindow(String title){
         setTitle(title);
@@ -23,7 +25,6 @@ public class MainWindow extends JFrame{
         setVisible(true);
         start();
     }
-
     private void start() {
         String name = JOptionPane.showInputDialog("Enter a name for your newly adopted penguin: ");
         if(name==null){
@@ -34,7 +35,6 @@ public class MainWindow extends JFrame{
         penguin.setName(name);
         updateStats();
     }
-
     public JPanel initStats(){
         Font statFont = new Font("Century Gothic",Font.PLAIN,36);
         health = new JLabel("100",createImageIcon("images/heart_32.png",null),SwingConstants.RIGHT);
@@ -48,7 +48,7 @@ public class MainWindow extends JFrame{
         happiness.setForeground(Color.GREEN);
         coinsLabel = new JLabel("0", createImageIcon("images/coin_32.png", null), SwingConstants.RIGHT);
         coinsLabel.setFont(statFont);
-        JPanel topPanel = new JPanel();
+        topPanel = new JPanel();
         JPanel row1 = new JPanel();
         JPanel row2 = new JPanel();
         topPanel.setLayout(new BoxLayout(topPanel, BoxLayout.Y_AXIS));
@@ -128,21 +128,20 @@ public class MainWindow extends JFrame{
         });
         return penguin;
     }
+    public JPanel initShop(){
 
+        shopPanel = new JScrollPane();
+        return null;
+    }
     private void toggleShop(){
         if(penguin.getBg()==Penguin.MAIN) {
             openShop();
         }else if(penguin.getBg()==Penguin.SHOP){
-            penguin.setBg(Penguin.MAIN);
-            shop.setText("SHOP");
+            closeShop();
+        }else if(penguin.getBg()==Penguin.FISHING) {
+            closeFishing();
+            openShop();
         }
-    }
-    private void openShop(){
-        penguin.setBg(Penguin.SHOP);
-        shop.setText("RETURN");
-    }
-    private void closeShop(){
-
     }
     private void toggleFishing(){
         if(penguin.getBg()==Penguin.MAIN) {
@@ -161,11 +160,20 @@ public class MainWindow extends JFrame{
     private void toggleMenu(){
 
     }
+    private void closeFishing() {
 
+    }
+    private void openShop(){
+        penguin.setBg(Penguin.SHOP);
+        shop.setText("RETURN");
+    }
+    private void closeShop(){
+        penguin.setBg(Penguin.MAIN);
+        shop.setText("SHOP");
+    }
     private void gameOver() {
         JOptionPane.showConfirmDialog(this,"Your penguin is tired of being neglected and has left. Adopt another?", "Game Over", JOptionPane.QUESTION_MESSAGE);
     }
-
     private void updateStats(){
         happiness.setText(""+penguin.getHappiness());
         if(penguin.getHappiness()==0){
@@ -217,8 +225,7 @@ public class MainWindow extends JFrame{
             cure.setEnabled(false);
         }
     }
-    public static ImageIcon createImageIcon(String path,
-                                      String description) {
+    public static ImageIcon createImageIcon(String path, String description) {
         java.net.URL imgURL = MainWindow.class.getResource(path);
         if (imgURL != null) {
             return new ImageIcon(imgURL, description);
@@ -227,12 +234,10 @@ public class MainWindow extends JFrame{
             return null;
         }
     }
-
     public void getCash(){
         coins+=penguin.getHappiness();
         updateStats();
     }
-
     public static void main(String[] args) {
         new MainWindow("Penguin");
     }
